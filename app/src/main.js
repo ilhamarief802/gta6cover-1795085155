@@ -243,12 +243,12 @@ export function setPanelTints(tintIds) {
   });
 }
 
-/** Assign photos (from loadPhotosFromUrls) to panels by index list. */
+/** Assign photos (from loadPhotosFromUrls) to panels: panel i gets photo
+ *  assignments[i] (an index into the loaded list). */
 export function assignSamplePhotosToPanels(photoList, assignments) {
-  photoList.forEach((photo, i) => {
-    const target = assignments[i];
-    if (target === undefined || !state.panels[target]) return;
-    state.panels[target].photo = photo;
+  assignments.forEach((photoIndex, panelIndex) => {
+    const photo = photoList[photoIndex];
+    if (photo && state.panels[panelIndex]) state.panels[panelIndex].photo = photo;
   });
   state.selectedPhoto = photoList[0] ?? null;
 }
@@ -480,7 +480,9 @@ function boot() {
   const query = new URLSearchParams(location.search);
   const shot = query.get('shot');
   if (shot && SHOT_NAMES.includes(shot)) {
-    document.body.classList.add('shot');
+    // Cover shots frame the canvas alone; the editor shot keeps the studio
+    // chrome so the capture shows the real working UI.
+    if (shot !== 'editor') document.body.classList.add('shot');
     // Force layout now so applyShotPreset's element sizing is measured post-CSS.
     void document.body.offsetHeight;
     applyShotPreset(shot, query, editorApi);

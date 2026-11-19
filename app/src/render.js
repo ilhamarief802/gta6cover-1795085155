@@ -17,6 +17,7 @@ const KICKER_SIZE = 0.42; // kicker px as a fraction of its box height
 const RATING_SIZE = 0.075; // rating box edge as a fraction of the short side
 const RATING_MARGIN = 0.045;
 const CREDIT_SIZE = 0.018; // credit px as a fraction of the short side
+const RULES_INSET = 0.16; // horizontal inset for the rule under the title
 
 const INK = 'rgba(255, 255, 255, 0.92)';
 const INK_DIM = 'rgba(255, 228, 190, 0.85)';
@@ -171,7 +172,7 @@ function drawTitleRule(ctx, titleBox, fit, fontDef) {
 /** Rating box (our own design) and the tiny credit line along the foot. */
 function drawOrnaments(ctx, width, height, state) {
   const short = Math.min(width, height);
-  if (state.showRatingBox) drawRatingBox(ctx, width, height, short);
+  if (state.showRatingBox) drawRatingBox(ctx, width, height, short, state);
   if (state.credit) drawCreditLine(ctx, width, height, short, state.credit);
 }
 
@@ -179,7 +180,7 @@ function drawOrnaments(ctx, width, height, state) {
  * A bordered square with a number inside — poster furniture of our own
  * design, not any real ratings board's mark.
  */
-function drawRatingBox(ctx, width, height, short) {
+function drawRatingBox(ctx, width, height, short, state) {
   const edge = short * RATING_SIZE;
   const m = short * RATING_MARGIN;
   const x = width - m - edge;
