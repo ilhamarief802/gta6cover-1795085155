@@ -1,0 +1,104 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NOCTURNE COVERS — multi-panel poster studio</title>
+<link rel="icon" href="data:,">
+<link rel="stylesheet" href="./style.css">
+</head>
+<body>
+<main class="app">
+
+  <!-- Left: every control, grouped the way a user reaches for them. -->
+  <aside class="controls" aria-label="Cover controls">
+    <header class="brand">
+      <h1>NOCTURNE COVERS</h1>
+      <p>Turn your photos into a multi-panel poster — the street-poster look, straight from your browser.</p>
+    </header>
+
+    <section class="group" aria-label="Photos">
+      <h2>Photos</h2>
+      <label class="file-label">Add photos
+        <input id="photo-input" type="file" accept="image/*" multiple>
+      </label>
+      <div id="photo-strip" class="photo-strip" aria-label="Loaded photos"></div>
+      <div class="row">
+        <button id="fill-all" type="button" title="Fill every panel with the selected photo">Fill all panels</button>
+        <button id="assign" type="button" title="Put the selected photo in the selected panel">Put in panel</button>
+      </div>
+    </section>
+
+    <section class="group" aria-label="Panels">
+      <h2>Panel <span id="panel-badge" class="badge">1</span></h2>
+      <div class="row">
+        <button id="panel-prev" type="button" aria-label="Previous panel">‹</button>
+        <button id="panel-next" type="button" aria-label="Next panel">›</button>
+        <label class="inline">Zoom
+          <input id="panel-zoom" type="range" min="1" max="3" step="0.01" value="1">
+        </label>
+      </div>
+      <label class="inline">Tint
+        <select id="panel-tint"></select>
+      </label>
+      <button id="panel-reset" type="button">Recentre photo</button>
+    </section>
+
+    <section class="group" aria-label="Caption">
+      <h2>Caption</h2>
+      <label>Title
+        <input id="caption" type="text" maxlength="60" value="NIGHT DRIVE">
+      </label>
+      <label>Kicker <span class="hint">(small line above)</span>
+        <input id="kicker" type="text" maxlength="48" value="the boulevard is open">
+      </label>
+      <label>Lettering
+        <select id="caption-font"></select>
+      </label>
+      <div class="row">
+        <button id="rule-toggle" type="button" class="toggle on">Rule under title</button>
+      </div>
+    </section>
+
+    <section class="group" aria-label="Poster layout">
+      <h2>Poster</h2>
+      <label>Layout
+        <select id="layout-select"></select>
+      </label>
+      <div class="row" role="group" aria-label="Post size">
+        <button class="size-btn" data-size="square" type="button">1:1</button>
+        <button class="size-btn" data-size="story" type="button">4:5</button>
+        <button class="size-btn" data-size="wide" type="button">16:9</button>
+      </div>
+      <div class="row">
+        <label class="inline">Grade
+          <input id="grade-strength" type="range" min="0" max="1" step="0.01" value="1">
+        </label>
+      </div>
+      <label class="inline">Credit line
+        <input id="credit" type="text" maxlength="48" value="a dusk city story">
+      </label>
+      <div class="row">
+        <button id="rating-toggle" type="button" class="toggle on">Rating box</button>
+        <button id="surprise" type="button">Surprise me</button>
+      </div>
+    </section>
+
+    <section class="group">
+      <button id="export" type="button" class="export">Export PNG</button>
+      <p id="status" role="status"></p>
+    </section>
+  </aside>
+
+  <!-- Centre: the live poster. Click a panel to edit it. -->
+  <section class="stage" aria-label="Live preview">
+    <div class="canvas-frame">
+      <canvas id="cover" width="1080" height="1080" aria-label="Cover preview — click a panel to select it"></canvas>
+    </div>
+    <p class="stage-hint">Click a panel to select it · drag to reposition its photo · wheel or slider to zoom</p>
+  </section>
+
+</main>
+<script type="module" src="./src/main.js"></script>
+</body>
+</html>
