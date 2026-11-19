@@ -1,40 +1,79 @@
-// A working gta6-cover-art-01 entry (Node 22, standard library only): the app is this directory's app/ folder, plain
-// static files a desktop browser loads offline (app/index.html and its ES modules, no library and no network
-// request), and the program hands it in. It copies app/ and screenshots/ from beside this file to /output and writes
-// /output/dossier.json, the summary the judge reads, with the vendored make.fun library. Only the plumbing, not the
-// cover art the bounty asks for: Cover Snap, a plain one-photo square cover with a sunset tint and a bold caption,
-// exported as a 1080 x 1080 PNG. Its two sample photos (app/samples/) were made for make.fun with an image model and
-// are free to use. Build your own GTA-style cover maker in its place, put your 3 or 4 PNG or JPEG screenshots in
-// screenshots/ (the first by name is the cover) and run it.
+// NOCTURNE COVERS — hand-in script for the gta6-cover-art-01 entry.
 //
-// Serve it locally with `node serve.ts`, then open http://localhost:8080.
-// Outside the grader's container, MAKEFUN_OUTPUT_DIR stands in for /output:
+// The studio itself is app/: static ES modules a browser loads straight off
+// disk, no build step, no network. This file only stages what the judge
+// reads — the app, the screenshots, and a dossier.json that bundles both —
+// into MAKEFUN_OUTPUT_DIR (the grader's writable volume, /output by default).
+//
 //   mkdir -p out && MAKEFUN_OUTPUT_DIR=out node main.ts
+//
+// Node 22, standard library only. Two runs over the same tree must leave
+// byte-identical output: nothing here reads the clock or samples randomness.
 
 import { cpSync, existsSync, mkdirSync, writeFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { buildDossier } from './vendor/makefun-app.ts';
 
-const here = fileURLToPath(new URL('.', import.meta.url));
-const out = process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+/** Where the hand-in lands. /output is the grader's mount; the env var is
+ *  the local stand-in so the same script works on a laptop. */
+function outputDir() {
+  return process.env.MAKEFUN_OUTPUT_DIR ?? '/output';
+}
 
-mkdirSync(out, { recursive: true });
-cpSync(join(here, 'app'), join(out, 'app'), { recursive: true });
-mkdirSync(join(out, 'screenshots'), { recursive: true });
-if (existsSync(join(here, 'screenshots'))) cpSync(join(here, 'screenshots'), join(out, 'screenshots'), { recursive: true });
+/** This repo's root, derived from this module's own URL. The grader mounts
+ *  the tree read-only at /bot and may start node from any directory, so the
+ *  current working directory is never trusted. */
+function repoRoot() {
+  return fileURLToPath(new URL('.', import.meta.url));
+}
 
-// The scorer's own caps (reference/gate.json): only text_max_bytes shapes the bytes; the others refuse an entry the
-// scorer would refuse (more than 4 screenshots or one over 256 KiB; more than 993 files in app/ or 48 MiB of app
-// files, in all, or a path under app/ over 1000 bytes: app/ counts beside /output's own 1000-entry cap, its
-// screenshots/ and dossier.json).
-writeFileSync(
-  join(out, 'dossier.json'),
-  buildDossier(out, {
+/** Quit with a message a human can act on, not a stack trace. */
+function fail(message) {
+  console.error(`main.ts: ${message}`);
+  process.exit(1);
+}
+
+/** Mirror one source directory into the output tree. A missing source is
+ *  not an error (screenshots/ is optional); anything else propagates. */
+function mirrorDir(source, destination) {
+  if (!existsSync(source)) return false;
+  cpSync(source, destination, { recursive: true });
+  return true;
+}
+
+/** The size limits the scorer enforces on a hand-in. Kept here as one
+ *  literal so the dossier call site stays a one-liner:
+ *    - text_max_bytes     cap on the dossier's own text block
+ *    - screenshots        at most 4 images, each at most 256 KiB
+ *    - app_max_files      at most 993 files under app/
+ *    - app_max_bytes      at most 48 MiB of app/ payload in total
+ *    - app_path_max_bytes no single app/ path longer than 1000 bytes */
+function collectCaps() {
+  return {
     text_max_bytes: 163840,
     screenshots: { max: 4, max_bytes: 262144 },
     app_max_files: 993,
     app_max_bytes: 50331648,
     app_path_max_bytes: 1000,
-  }),
-);
+  };
+}
+
+// ---- the pipeline: check, stage, dossier ---------------------------------
+
+const root = repoRoot();
+const appDir = join(root, 'app');
+
+// The app is the entry. Without it there is nothing to judge, so say so and
+// leave a non-zero exit code behind.
+if (!existsSync(appDir)) {
+  fail(`no app/ directory beside this file (looked in ${appDir}) — nothing to hand in`);
+}
+
+const out = outputDir();
+mkdirSync(out, { recursive: true });
+
+mirrorDir(appDir, join(out, 'app'));
+mirrorDir(join(root, 'screenshots'), join(out, 'screenshots'));
+
+writeFileSync(join(out, 'dossier.json'), buildDossier(out, collectCaps()));
