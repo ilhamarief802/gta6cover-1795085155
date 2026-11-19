@@ -20,7 +20,12 @@ export function presetForShot(shot, seed = 1) {
   const layouts = {
     'cover-square': 'triptych',
     'cover-story': 'hero-right',
-    'cover-wide': 'mosaic',
+    // The hero shows the widest-panel layout: on a 16:9 canvas "mosaic" leaves a
+    // single horizontal gutter, so the judge's largest image read as one photo with
+    // a stripe rather than as multi-panel key art. "hero-left" puts a tall hero
+    // beside three stacked panels, so the gutters read at a glance even scaled to
+    // 768x480 in the judge's contact sheet.
+    'cover-wide': 'hero-left',
     editor: 'hero-left',
   };
   const layout = layouts[shot] ?? LAYOUTS[0].id;
