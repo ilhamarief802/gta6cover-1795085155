@@ -109,6 +109,7 @@ button {
   cursor: pointer;
 }
 button:hover { border-color: var(--accent); }
+button.size-btn.active { background: var(--accent); border-color: var(--accent); color: #1b0a14; }
 button.toggle.on { background: var(--accent-2); border-color: var(--accent-2); color: #fff; }
 button.export {
   background: linear-gradient(120deg, var(--accent-2), var(--accent));
